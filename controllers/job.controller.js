@@ -74,7 +74,14 @@ exports.getJobs = async (req, res) => {
     if (experienceLevel) filter.experienceLevel = experienceLevel;
 
     const jobs = await Job.findAll({
-      where: filter
+      where: filter,
+       include: [
+        {
+          model: Company,
+          attributes: ["id", "name", "location"]
+        }
+      ]
+
     });
 
     res.json(jobs);
