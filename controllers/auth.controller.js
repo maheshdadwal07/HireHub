@@ -1,6 +1,16 @@
 const db = require("../models");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { registerSchema } = require("../validation/auth.validation");
+
+const { error } = registerSchema.validate(req.body);
+
+if (error) {
+  return res.status(400).json({
+    message: error.details[0].message
+  });
+}
+
 
 const User = db.User;
 
