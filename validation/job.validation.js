@@ -1,21 +1,57 @@
 const Joi = require("joi");
 
 exports.jobSchema = Joi.object({
-  title: Joi.string().min(3).required(),
-  description: Joi.string().min(5).required(),
+  title: Joi.string()
+    .trim()
+    .min(3)
+    .max(100)
+    .required(),
 
-  skillsRequired: Joi.string().optional(),
+  description: Joi.string()
+    .trim()
+    .min(10)
+    .max(2000)
+    .required(),
 
-  location: Joi.string().required(),
+  skillsRequired: Joi.string()
+    .trim()
+    .allow("")
+    .optional(),
 
-  employmentType: Joi.string().required(),
+  location: Joi.string()
+    .trim()
+    .required(),
 
-  experienceLevel: Joi.string().required(),
+  employmentType: Joi.string()
+    .valid("FULL_TIME", "PART_TIME", "INTERNSHIP", "CONTRACT")
+    .required(),
 
-  salaryMin: Joi.number().required(),
-  salaryMax: Joi.number().required(),
+  experienceLevel: Joi.string()
+    .valid("FRESHER", "JUNIOR", "MID", "SENIOR")
+    .required(),
 
-  applicationDeadline: Joi.date().required(),
+  salaryMin: Joi.number()
+    .integer()
+    .min(0)
+    .required(),
 
-  companyId: Joi.number().required()
+  salaryMax: Joi.number()
+    .integer()
+    .min(Joi.ref("salaryMin"))
+    .required()
+    .messages({
+      "number.min": "salaryMax must be greater than or equal to salaryMin",
+    }),
+
+  applicationDeadline: Joi.date()
+    .greater("now")
+    .required()
+    .messages({
+      "date.greater": "Deadline must be a future date",
+    }),
+
+  companyId: Joi.number()
+    .integer()
+    .positive()
+    .required(),
 });

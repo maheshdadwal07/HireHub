@@ -13,19 +13,61 @@ db.Company = Company;
 db.Job = Job;
 db.Application = Application;
 
-/* Relationships */
+/* ================= RELATIONSHIPS ================= */
 
-User.hasMany(Job, { foreignKey: "postedBy" });
-Job.belongsTo(User, { foreignKey: "postedBy" });
+// 🔹 User → Jobs (Recruiter posts jobs)
+User.hasMany(Job, {
+  foreignKey: "postedBy",
+  as: "postedJobs",
+  onDelete: "CASCADE",
+});
+Job.belongsTo(User, {
+  foreignKey: "postedBy",
+  as: "recruiter",
+});
 
-Company.hasMany(Job, { foreignKey: "companyId" });
-Job.belongsTo(Company, { foreignKey: "companyId" });
+// 🔹 Company → Jobs
+Company.hasMany(Job, {
+  foreignKey: "companyId",
+  as: "jobs",
+  onDelete: "CASCADE",
+});
+Job.belongsTo(Company, {
+  foreignKey: "companyId",
+  as: "company",
+});
 
-User.hasMany(Application, { foreignKey: "applicantId" });
-Application.belongsTo(User, { foreignKey: "applicantId" });
+// 🔹 User → Applications
+User.hasMany(Application, {
+  foreignKey: "applicantId",
+  as: "applications",
+  onDelete: "CASCADE",
+});
+Application.belongsTo(User, {
+  foreignKey: "applicantId",
+  as: "applicant",
+});
 
-Job.hasMany(Application, { foreignKey: "jobId" });
-Application.belongsTo(Job, { foreignKey: "jobId" });
+// 🔹 Job → Applications
+Job.hasMany(Application, {
+  foreignKey: "jobId",
+  as: "applications",
+  onDelete: "CASCADE",
+});
+Application.belongsTo(Job, {
+  foreignKey: "jobId",
+  as: "job",
+});
 
+// 🔹 User → Company (creator)
+User.hasMany(Company, {
+  foreignKey: "createdBy",
+  as: "companies",
+  onDelete: "CASCADE",
+});
+Company.belongsTo(User, {
+  foreignKey: "createdBy",
+  as: "owner",
+});
 
 module.exports = db;

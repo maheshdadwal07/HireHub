@@ -1,26 +1,22 @@
 const db = require("../models");
 const { jobSchema } = require("../validation/job.validation");
+const { Op } = require("sequelize");
+
 const Job = db.Job;
 const Company = db.Company;
 
-
 // CREATE JOB
-exports.createJob = async (req, res) => {
-
+exports.createJob = async (req, res, next) => {
   try {
-
-    if (req.user.role !== "RECRUITER") {
-      return res.status(403).json({
-        message: "Only recruiters can post jobs"
-      });
-    }
-     const { error } = jobSchema.validate(req.body);
+    const { error } = jobSchema.validate(req.body);
 
     if (error) {
       return res.status(400).json({
-        message: error.details[0].message
+        success: false,
+        message: error.details[0].message,
       });
     }
+
     const {
       title,
       description,
@@ -31,13 +27,28 @@ exports.createJob = async (req, res) => {
       salaryMin,
       salaryMax,
       applicationDeadline,
-      companyId
+      companyId,
     } = req.body;
+
+    const company = await Company.findByPk(companyId);
+    if (!company) {
+      return res.status(404).json({
+        success: false,
+        message: "Company not found",
+      });
+    }
+
+    if (salaryMax < salaryMin) {
+      return res.status(400).json({
+        success: false,
+        message: "salaryMax must be >= salaryMin",
+      });
+    }
 
     const job = await Job.create({
       title,
       description,
-      skillsRequired,
+      skillsRequired: skillsRequired || "",
       location,
       employmentType,
       experienceLevel,
@@ -45,33 +56,36 @@ exports.createJob = async (req, res) => {
       salaryMax,
       applicationDeadline,
       companyId,
-      postedBy: req.user.id
+      postedBy: req.user.id,
     });
 
     res.status(201).json({
+      success: true,
       message: "Job posted successfully",
-      job
+      data: {
+        id: job.id,
+        title: job.title,
+      },
     });
 
   } catch (error) {
-
-    res.status(500).json({
-      message: "Failed to create job",
-      error: error.message
-    });
-
+    next(error);
   }
-
 };
 
 
-
-// GET ALL JOBS (with filters)
-exports.getJobs = async (req, res) => {
-
+// GET ALL JOBS
+exports.getJobs = async (req, res, next) => {
   try {
+    const {
+      location,
+      employmentType,
+      experienceLevel,
+      search,
+    } = req.query;
 
-    const { location, employmentType, experienceLevel } = req.query;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
 
     const filter = {};
 
@@ -79,52 +93,147 @@ exports.getJobs = async (req, res) => {
     if (employmentType) filter.employmentType = employmentType;
     if (experienceLevel) filter.experienceLevel = experienceLevel;
 
-    const jobs = await Job.findAll({
+    if (search) {
+      filter[Op.or] = [
+        { title: { [Op.like]: `%${search}%` } },
+        { description: { [Op.like]: `%${search}%` } },
+      ];
+    }
+
+    const offset = (page - 1) * limit;
+
+    const jobs = await Job.findAndCountAll({
       where: filter,
-       include: [
+      limit,
+      offset,
+
+      attributes: [
+        "id",
+        "title",
+        "description",
+        "location",
+        "employmentType",
+        "experienceLevel",
+        "salaryMin",
+        "salaryMax",
+        "skillsRequired",
+        "createdAt",
+      ],
+
+      include: [
         {
           model: Company,
-          attributes: ["id", "name", "location"]
-        }
-      ]
+          as: "company",
+          attributes: ["id", "name", "location"],
+        },
+      ],
 
+      order: [["createdAt", "DESC"]],
     });
 
-    res.json(jobs);
+    const formattedJobs = jobs.rows.map(job => ({
+      id: job.id,
+      title: job.title,
+      description: job.description,
+      location: job.location,
+      employmentType: job.employmentType,
+      experienceLevel: job.experienceLevel,
+      salary: {
+        min: job.salaryMin,
+        max: job.salaryMax,
+      },
+      skillsRequired: job.skillsRequired || "",
+      company: job.company
+        ? {
+            id: job.company.id,
+            name: job.company.name,
+            location: job.company.location || "",
+          }
+        : null,
+      createdAt: job.createdAt,
+    }));
+
+    res.json({
+      success: true,
+      total: jobs.count,
+      page,
+      totalPages: Math.ceil(jobs.count / limit),
+      data: formattedJobs,
+    });
 
   } catch (error) {
-
-    res.status(500).json({
-      message: "Error fetching jobs"
-    });
-
+    next(error);
   }
-
 };
 
 
-
 // GET JOB BY ID
-exports.getJobById = async (req, res) => {
-
+exports.getJobById = async (req, res, next) => {
   try {
+    const id = req.params.id;
 
-    const job = await Job.findByPk(req.params.id);
-
-    if (!job) {
-      return res.status(404).json({
-        message: "Job not found"
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Job ID is required",
       });
     }
 
-    res.json(job);
-
-  } catch (error) {
-
-    res.status(500).json({
-      message: "Error fetching job"
+    const job = await Job.findByPk(id, {
+      attributes: [
+        "id",
+        "title",
+        "description",
+        "location",
+        "employmentType",
+        "experienceLevel",
+        "salaryMin",
+        "salaryMax",
+        "skillsRequired",
+        "createdAt",
+      ],
+      include: [
+        {
+          model: Company,
+          as: "company",
+          attributes: ["id", "name", "location"],
+        },
+      ],
     });
 
-  }
+    if (!job) {
+      return res.status(404).json({
+        success: false,
+        message: "Job not found",
+      });
+    }
 
+    res.json({
+      success: true,
+      data: {
+        id: job.id,
+        title: job.title,
+        description: job.description,
+        location: job.location,
+        employmentType: job.employmentType,
+        experienceLevel: job.experienceLevel,
+        salary: {
+          min: job.salaryMin,
+          max: job.salaryMax,
+        },
+        skillsRequired: job.skillsRequired || "",
+        company: job.company
+          ? {
+              id: job.company.id,
+              name: job.company.name,
+              location: job.company.location || "",
+            }
+          : null,
+        createdAt: job.createdAt,
+      },
+    });
+
+  } catch (error) {
+    next(error);
+  }
 };

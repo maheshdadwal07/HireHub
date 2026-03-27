@@ -2,86 +2,156 @@ const db = require("../models");
 
 const Company = db.Company;
 
-
 // CREATE COMPANY
-exports.createCompany = async (req, res) => {
-
+exports.createCompany = async (req, res, next) => {
   try {
+    const { name, description, website, location } = req.body;
 
-    if (req.user.role !== "RECRUITER") {
-      return res.status(403).json({
-        message: "Only recruiters can create companies"
+    if (!name || !description || !location) {
+      return res.status(400).json({
+        success: false,
+        message: "Name, description and location are required",
       });
     }
-
-    const { name, description, website, location } = req.body;
 
     const company = await Company.create({
       name,
       description,
-      website,
+      website: website || "",
       location,
-      createdBy: req.user.id
+      createdBy: req.user.id,
     });
 
     res.status(201).json({
+      success: true,
       message: "Company created successfully",
-      company
+      data: {
+        id: company.id,
+        name: company.name,
+      },
     });
 
   } catch (error) {
-
-    res.status(500).json({
-      message: "Failed to create company",
-      error: error.message
-    });
-
+    next(error);
   }
-
 };
 
 
 // GET ALL COMPANIES
-exports.getCompanies = async (req, res) => {
-
+exports.getCompanies = async (req, res, next) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
 
-    const companies = await Company.findAll();
+    const offset = (page - 1) * limit;
 
-    res.json(companies);
+    const companies = await Company.findAndCountAll({
+      limit,
+      offset,
 
-  } catch (error) {
+      attributes: ["id", "name", "location", "createdAt"],
 
-    res.status(500).json({
-      message: "Error fetching companies"
+      include: [
+        {
+          model: db.User,
+          as: "owner",
+          attributes: ["id", "name"],
+        },
+      ],
+
+      order: [["createdAt", "DESC"]],
     });
 
-  }
+    const formatted = companies.rows.map(c => ({
+      id: c.id,
+      name: c.name,
+      location: c.location,
+      owner: c.owner
+        ? {
+            id: c.owner.id,
+            name: c.owner.name,
+          }
+        : null,
+      createdAt: c.createdAt,
+    }));
 
+    res.json({
+      success: true,
+      total: companies.count,
+      page,
+      totalPages: Math.ceil(companies.count / limit),
+      data: formatted,
+    });
+
+  } catch (error) {
+    next(error);
+  }
 };
 
 
 // GET COMPANY BY ID
-exports.getCompanyById = async (req, res) => {
-
+exports.getCompanyById = async (req, res, next) => {
   try {
+    const id = req.params.id;
 
-    const company = await Company.findByPk(req.params.id);
-
-    if (!company) {
-      return res.status(404).json({
-        message: "Company not found"
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Company ID is required",
       });
     }
 
-    res.json(company);
+    const company = await Company.findByPk(id, {
+      attributes: ["id", "name", "description", "website", "location"],
 
-  } catch (error) {
-
-    res.status(500).json({
-      message: "Error fetching company"
+      include: [
+        {
+          model: db.User,
+          as: "owner",
+          attributes: ["id", "name"],
+        },
+        {
+          model: db.Job,
+          as: "jobs",
+          attributes: ["id", "title", "location", "salaryMin", "salaryMax"],
+        },
+      ],
     });
 
-  }
+    if (!company) {
+      return res.status(404).json({
+        success: false,
+        message: "Company not found",
+      });
+    }
 
+    res.json({
+      success: true,
+      data: {
+        id: company.id,
+        name: company.name,
+        description: company.description,
+        website: company.website || "",
+        location: company.location,
+        owner: company.owner
+          ? {
+              id: company.owner.id,
+              name: company.owner.name,
+            }
+          : null,
+        jobs: (company.jobs || []).map(job => ({
+          id: job.id,
+          title: job.title,
+          location: job.location,
+          salary: {
+            min: job.salaryMin,
+            max: job.salaryMax,
+          },
+        })),
+      },
+    });
+
+  } catch (error) {
+    next(error);
+  }
 };

@@ -4,108 +4,232 @@ const Application = db.Application;
 const Job = db.Job;
 
 // APPLY TO JOB
-exports.applyJob = async (req, res) => {
+exports.applyJob = async (req, res, next) => {
   try {
     const jobId = req.params.jobId;
 
-    const job = await Job.findByPk(jobId);
-
-    if (!job) {
-      return res.status(404).json({
-        message: "Job not found",
+    if (!jobId) {
+      return res.status(400).json({
+        success: false,
+        message: "Job ID is required",
       });
     }
 
-    const application = await Application.create({
-      jobId: jobId,
-      applicantId: req.user.id,
+    const job = await Job.findByPk(jobId);
+    if (!job || job.status !== "OPEN") {
+      return res.status(404).json({
+        success: false,
+        message: "Job not available",
+      });
+    }
+
+    const existing = await Application.findOne({
+      where: {
+        jobId,
+        applicantId: req.user.id,
+      },
     });
 
-    res.status(201).json({
-      message: "Application submitted successfully",
-      application,
-    });
-  } catch (error) {
-    if (error.name === "SequelizeUniqueConstraintError") {
+    if (existing) {
       return res.status(400).json({
+        success: false,
         message: "You already applied to this job",
       });
     }
 
-    res.status(500).json({
-      message: "Application failed",
+    const application = await Application.create({
+      jobId,
+      applicantId: req.user.id,
     });
+
+    res.status(201).json({
+      success: true,
+      message: "Application submitted successfully",
+      data: {
+        id: application.id,
+        jobId: application.jobId,
+        status: application.status,
+      },
+    });
+
+  } catch (error) {
+    next(error);
   }
 };
+
 // GET MY APPLICATIONS
-exports.getMyApplications = async (req, res) => {
+exports.getMyApplications = async (req, res, next) => {
   try {
-    const userId = req.user.id;
     const applications = await Application.findAll({
-      where: { applicantId: userId },
+      where: { applicantId: req.user.id },
       include: [
         {
           model: Job,
-          attributes: ["title", "location"],
+          as: "job",
+          attributes: [
+            "id",
+            "title",
+            "location",
+            "salaryMin",
+            "salaryMax",
+          ],
+          include: [
+            {
+              model: db.Company,
+              as: "company",
+              attributes: ["id", "name"],
+            },
+          ],
         },
       ],
+      order: [["createdAt", "DESC"]],
     });
-    res.json(applications);
+
+    const formatted = applications.map(app => ({
+      id: app.id,
+      status: app.status,
+      appliedAt: app.createdAt,
+      job: app.job
+        ? {
+            id: app.job.id,
+            title: app.job.title,
+            location: app.job.location,
+            salary: {
+              min: app.job.salaryMin,
+              max: app.job.salaryMax,
+            },
+            company: app.job.company
+              ? {
+                  id: app.job.company.id,
+                  name: app.job.company.name,
+                }
+              : null,
+          }
+        : null,
+    }));
+
+    res.json({
+      success: true,
+      count: formatted.length,
+      data: formatted,
+    });
+
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
+    next(error);
   }
 };
 
 // GET APPLICATIONS BY JOB
-exports.getApplicationByJob = async (req, res) => {
+exports.getApplicationByJob = async (req, res, next) => {
   try {
     const { jobId } = req.params;
+
+    const job = await Job.findByPk(jobId);
+    if (!job || job.postedBy !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized",
+      });
+    }
+
     const applications = await Application.findAll({
-      where: { jobId: jobId },
+      where: { jobId },
+      include: [
+        {
+          model: db.User,
+          as: "applicant",
+          attributes: ["id", "name", "email"],
+        },
+      ],
+      order: [["createdAt", "DESC"]],
     });
-    res.json(applications);
+
+    const formatted = applications.map(app => ({
+      id: app.id,
+      status: app.status,
+      applicant: app.applicant
+        ? {
+            id: app.applicant.id,
+            name: app.applicant.name,
+            email: app.applicant.email,
+          }
+        : null,
+      appliedAt: app.createdAt,
+    }));
+
+    res.json({
+      success: true,
+      count: formatted.length,
+      data: formatted,
+    });
+
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
+    next(error);
   }
 };
 
 // UPDATE APPLICATION STATUS
-exports.updateStatus = async (req, res) => {
+const VALID_TRANSITIONS = {
+  APPLIED: ["SHORTLISTED", "REJECTED"],
+  SHORTLISTED: ["INTERVIEW", "REJECTED"],
+  INTERVIEW: ["HIRED", "REJECTED"],
+};
+
+exports.updateStatus = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { status } = req.body;
-    const application = await Application.findByPk(id);
+    let { status } = req.body;
 
+    if (!status) {
+      return res.status(400).json({
+        success: false,
+        message: "Status is required",
+      });
+    }
+
+    status = status.toUpperCase();
+
+    const application = await Application.findByPk(id);
     if (!application) {
       return res.status(404).json({
+        success: false,
         message: "Application not found",
       });
     }
+
     const job = await Job.findByPk(application.jobId);
-    if (!job) {
-      return res.status(404).json({
-        message: "Associated job not found",
-      });
-    }
-    if (job.postedBy !== req.user.id) {
+    if (!job || job.postedBy !== req.user.id) {
       return res.status(403).json({
-        message: "You are not authorized to update this application",
+        success: false,
+        message: "Not authorized",
       });
     }
 
-    application.status = status.toUpperCase();
+    const currentStatus = application.status;
+
+    if (
+      !VALID_TRANSITIONS[currentStatus] ||
+      !VALID_TRANSITIONS[currentStatus].includes(status)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid transition from ${currentStatus} to ${status}`,
+      });
+    }
+
+    application.status = status;
     await application.save();
+
     res.json({
-      message: "Application status updated successfully",
-      application: application.toJSON(),
+      success: true,
+      message: "Application status updated",
+      data: {
+        id: application.id,
+        status: application.status,
+      },
     });
+
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
+    next(error);
   }
 };

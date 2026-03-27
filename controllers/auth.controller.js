@@ -6,13 +6,14 @@ const { registerSchema } = require("../validation/auth.validation");
 const User = db.User;
 
 // REGISTER
-exports.register = async (req, res) => {
+exports.register = async (req, res, next) => {
   try {
     const { error } = registerSchema.validate(req.body);
 
     if (error) {
       return res.status(400).json({
-        message: error.details[0].message
+        success: false,
+        message: error.details[0].message,
       });
     }
 
@@ -25,48 +26,56 @@ exports.register = async (req, res) => {
 
     if (existingUser) {
       return res.status(400).json({
-        message: "User already exists"
+        success: false,
+        message: "User already exists",
       });
     }
 
-    // ❗ NO hashing here (model hook karega)
     const user = await User.create({
       name,
       email,
-      password,
-      role: role || "JOB_SEEKER"
+      password, // hashed via model hook
+      role: role || "JOB_SEEKER",
     });
 
     res.status(201).json({
+      success: true,
       message: "User registered successfully",
-      user: {
+      data: {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role
-      }
+        role: user.role,
+      },
     });
 
   } catch (error) {
-    res.status(500).json({
-      message: "Registration failed",
-      error: error.message
-    });
+    next(error);
   }
 };
 
-
 // LOGIN
-exports.login = async (req, res) => {
+exports.login = async (req, res, next) => {
   try {
-    const email = String(req.body.email).toLowerCase().trim();
-    const password = String(req.body.password);
+    const email = String(req.body.email || "").toLowerCase().trim();
+    const password = String(req.body.password || "");
 
-    const user = await User.findOne({ where: { email } });
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required",
+      });
+    }
+
+    const user = await User.findOne({
+      where: { email },
+      attributes: ["id", "name", "email", "password", "role"],
+    });
 
     if (!user) {
       return res.status(401).json({
-        message: "Invalid email or password"
+        success: false,
+        message: "Invalid email or password",
       });
     }
 
@@ -74,25 +83,41 @@ exports.login = async (req, res) => {
 
     if (!validPassword) {
       return res.status(401).json({
-        message: "Invalid email or password"
+        success: false,
+        message: "Invalid email or password",
       });
     }
 
+    if (!process.env.JWT_SECRET) {
+      const err = new Error("JWT_SECRET is not defined");
+      err.status = 500;
+      return next(err);
+    }
+
     const token = jwt.sign(
-      { id: user.id, role: user.role },
-      process.env.JWT_SECRET || "fallbacksecret",
+      {
+        id: user.id,
+        role: user.role,
+      },
+      process.env.JWT_SECRET,
       { expiresIn: "24h" }
     );
 
     res.json({
+      success: true,
       message: "Login successful",
-      token
+      data: {
+        token,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
+      },
     });
 
   } catch (error) {
-    res.status(500).json({
-      message: "Login failed",
-      error: error.message
-    });
+    next(error);
   }
 };
