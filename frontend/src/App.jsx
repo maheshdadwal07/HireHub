@@ -1,15 +1,28 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import Home from './pages/Home';
+import ProtectedRoute from './components/ProtectedRoute';
+import MainLayout from './components/layout/MainLayout';
 
 function App() {
   return (
     <Router>
       <Routes>
+        {/* Public Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        {/* Redirect root to login for now */}
-        <Route path="/" element={<Navigate to="/login" />} />
+
+        {/* Protected Routes */}
+        <Route element={<ProtectedRoute />}>
+          <Route element={<MainLayout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/applications" element={<div>My Applications Placeholder</div>} />
+          </Route>
+        </Route>
+
+        {/* Catch all */}
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
   );
