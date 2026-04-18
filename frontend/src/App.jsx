@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Home from './pages/Home';
+import JobDetails from './pages/JobDetails';
 import ProtectedRoute from './components/ProtectedRoute';
 import MainLayout from './components/layout/MainLayout';
 
@@ -17,6 +18,7 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route element={<MainLayout />}>
             <Route path="/" element={<Home />} />
+            <Route path="/jobs/:id" element={<JobDetails />} />
             <Route path="/applications" element={<div>My Applications Placeholder</div>} />
           </Route>
         </Route>

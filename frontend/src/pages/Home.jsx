@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Briefcase, IndianRupee, Loader2 } from 'lucide-react';
 import { getJobs } from '../services/job.service';
 
 const Home = () => {
+    const navigate = useNavigate();
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState({
@@ -71,7 +73,11 @@ const Home = () => {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {jobs.length > 0 ? jobs.map((job) => (
-                        <div key={job.id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer group">
+                        <div 
+                            key={job.id} 
+                            onClick={() => navigate(`/jobs/${job.id}`)}
+                            className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer group"
+                        >
                             <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">{job.title}</h3>
                             <p className="text-blue-600 font-medium mt-1">{job.company?.name || 'Confidential'}</p>
                             

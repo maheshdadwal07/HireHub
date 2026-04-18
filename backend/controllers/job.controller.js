@@ -108,6 +108,7 @@ exports.getJobs = async (req, res, next) => {
         "salaryMin",
         "salaryMax",
         "skillsRequired",
+        "postedBy",
         "createdAt",
       ],
 
@@ -181,6 +182,7 @@ exports.getJobById = async (req, res, next) => {
         "salaryMin",
         "salaryMax",
         "skillsRequired",
+        "postedBy",
         "createdAt",
       ],
       include: [
