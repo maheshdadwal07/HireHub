@@ -67,10 +67,14 @@ const Company = sequelize.define("Company", {
       },
     },
   },
-
 }, {
   timestamps: true,
   tableName: "companies",
+  indexes: [
+    {
+      fields: ["createdBy"],
+    },
+  ],
 });
 
 module.exports = Company;

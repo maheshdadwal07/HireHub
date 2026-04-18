@@ -7,13 +7,6 @@ exports.createCompany = async (req, res, next) => {
   try {
     const { name, description, website, location } = req.body;
 
-    if (!name || !description || !location) {
-      return res.status(400).json({
-        success: false,
-        message: "Name, description and location are required",
-      });
-    }
-
     const company = await Company.create({
       name,
       description,

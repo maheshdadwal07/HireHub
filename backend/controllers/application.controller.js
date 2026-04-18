@@ -1,21 +1,18 @@
 const db = require("../models");
+const authService = require("../services/authorization.service");
 
 const Application = db.Application;
 const Job = db.Job;
 
 exports.applyJob = async (req, res, next) => {
+  const t = await db.sequelize.transaction();
   try {
-    const jobId = req.params.jobId;
+    const { jobId } = req.params;
+    const { coverLetter, resumeUrl } = req.body;
 
-    if (!jobId) {
-      return res.status(400).json({
-        success: false,
-        message: "Job ID is required",
-      });
-    }
-
-    const job = await Job.findByPk(jobId);
+    const job = await Job.findByPk(jobId, { transaction: t });
     if (!job || job.status !== "OPEN") {
+      await t.rollback();
       return res.status(404).json({
         success: false,
         message: "Job not available",
@@ -27,9 +24,11 @@ exports.applyJob = async (req, res, next) => {
         jobId,
         applicantId: req.user.id,
       },
+      transaction: t,
     });
 
     if (existing) {
+      await t.rollback();
       return res.status(400).json({
         success: false,
         message: "You already applied to this job",
@@ -39,7 +38,11 @@ exports.applyJob = async (req, res, next) => {
     const application = await Application.create({
       jobId,
       applicantId: req.user.id,
-    });
+      coverLetter,
+      resumeUrl,
+    }, { transaction: t });
+
+    await t.commit();
 
     res.status(201).json({
       success: true,
@@ -52,6 +55,7 @@ exports.applyJob = async (req, res, next) => {
     });
 
   } catch (error) {
+    await t.rollback();
     next(error);
   }
 };
@@ -121,13 +125,8 @@ exports.getApplicationByJob = async (req, res, next) => {
   try {
     const { jobId } = req.params;
 
-    const job = await Job.findByPk(jobId);
-    if (!job || job.postedBy !== req.user.id) {
-      return res.status(403).json({
-        success: false,
-        message: "Not authorized",
-      });
-    }
+    // Verify recruiter posted this job
+    await authService.verifyJobOwnership(req.user.id, jobId);
 
     const applications = await Application.findAll({
       where: { jobId },
@@ -172,6 +171,7 @@ const VALID_TRANSITIONS = {
 };
 
 exports.updateStatus = async (req, res, next) => {
+  const t = await db.sequelize.transaction();
   try {
     const { id } = req.params;
     let { status } = req.body;
@@ -185,21 +185,17 @@ exports.updateStatus = async (req, res, next) => {
 
     status = status.toUpperCase();
 
-    const application = await Application.findByPk(id);
+    const application = await Application.findByPk(id, { transaction: t });
     if (!application) {
+      await t.rollback();
       return res.status(404).json({
         success: false,
         message: "Application not found",
       });
     }
 
-    const job = await Job.findByPk(application.jobId);
-    if (!job || job.postedBy !== req.user.id) {
-      return res.status(403).json({
-        success: false,
-        message: "Not authorized",
-      });
-    }
+    // Verify recruiter posted this job
+    await authService.verifyJobOwnership(req.user.id, application.jobId, { transaction: t });
 
     const currentStatus = application.status;
 
@@ -207,6 +203,7 @@ exports.updateStatus = async (req, res, next) => {
       !VALID_TRANSITIONS[currentStatus] ||
       !VALID_TRANSITIONS[currentStatus].includes(status)
     ) {
+      await t.rollback();
       return res.status(400).json({
         success: false,
         message: `Invalid transition from ${currentStatus} to ${status}`,
@@ -214,7 +211,9 @@ exports.updateStatus = async (req, res, next) => {
     }
 
     application.status = status;
-    await application.save();
+    await application.save({ transaction: t });
+
+    await t.commit();
 
     res.json({
       success: true,
@@ -226,6 +225,7 @@ exports.updateStatus = async (req, res, next) => {
     });
 
   } catch (error) {
+    await t.rollback();
     next(error);
   }
 };

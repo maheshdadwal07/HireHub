@@ -1,25 +1,11 @@
 const db = require("../models");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { registerSchema } = require("../validation/auth.validation");
-
 const User = db.User;
 
 exports.register = async (req, res, next) => {
   try {
-    const { error } = registerSchema.validate(req.body);
-
-    if (error) {
-      return res.status(400).json({
-        success: false,
-        message: error.details[0].message,
-      });
-    }
-
-    const { name, role } = req.body;
-
-    const email = String(req.body.email).toLowerCase().trim();
-    const password = String(req.body.password);
+    const { name, email, password, role } = req.body;
 
     const existingUser = await User.findOne({ where: { email } });
 
@@ -33,7 +19,7 @@ exports.register = async (req, res, next) => {
     const user = await User.create({
       name,
       email,
-      password, 
+      password,
       role: role || "JOB_SEEKER",
     });
 
@@ -56,15 +42,7 @@ exports.register = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
   try {
-    const email = String(req.body.email || "").toLowerCase().trim();
-    const password = String(req.body.password || "");
-
-    if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "Email and password are required",
-      });
-    }
+    const { email, password } = req.body;
 
     const user = await User.findOne({
       where: { email },

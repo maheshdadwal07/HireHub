@@ -1,7 +1,6 @@
 const Joi = require("joi");
 
 exports.registerSchema = Joi.object({
-
   name: Joi.string()
     .trim()
     .min(2)
@@ -31,5 +30,13 @@ exports.registerSchema = Joi.object({
   role: Joi.string()
     .valid("RECRUITER", "JOB_SEEKER")
     .optional(),
+});
 
+exports.loginSchema = Joi.object({
+  email: Joi.string().trim().lowercase().email().required(),
+  password: Joi.string().required(),
+});
+
+exports.updateUserRoleSchema = Joi.object({
+  role: Joi.string().valid("RECRUITER", "JOB_SEEKER").required(),
 });

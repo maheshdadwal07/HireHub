@@ -153,6 +153,14 @@ const Job = sequelize.define("Job", {
 }, {
   timestamps: true,
   tableName: "jobs",
+  indexes: [
+    {
+      fields: ["companyId"],
+    },
+    {
+      fields: ["postedBy"],
+    },
+  ],
 });
 
 module.exports = Job;

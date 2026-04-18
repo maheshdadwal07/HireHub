@@ -87,6 +87,12 @@ const Application = sequelize.define("Application", {
       unique: true,
       fields: ["jobId", "applicantId"],
     },
+    {
+      fields: ["jobId"],
+    },
+    {
+      fields: ["applicantId"],
+    },
   ],
 
 });

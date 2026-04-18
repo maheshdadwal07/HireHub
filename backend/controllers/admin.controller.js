@@ -5,13 +5,6 @@ exports.updateUserRole = async (req, res, next) => {
     const { id } = req.params;
     const { role } = req.body;
 
-    if (!["RECRUITER", "JOB_SEEKER"].includes(role)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid role",
-      });
-    }
-
     const user = await db.User.findByPk(id);
 
     if (!user) {

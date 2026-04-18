@@ -1,4 +1,19 @@
+# Node modules
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Environment files
 .env
-logs
-node_modules
-dist
+backend/.env
+frontend/.env
+
+# Logs
+logs/
+*.log
+
+# Build artifacts
+dist/
+build/
+.next/
+out/
