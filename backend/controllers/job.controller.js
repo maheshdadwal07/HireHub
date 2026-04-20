@@ -73,6 +73,7 @@ exports.getJobs = async (req, res, next) => {
       employmentType,
       experienceLevel,
       search,
+      postedBy,
     } = req.query;
 
     const page = parseInt(req.query.page) || 1;
@@ -135,6 +136,7 @@ exports.getJobs = async (req, res, next) => {
         max: job.salaryMax,
       },
       skillsRequired: job.skillsRequired || "",
+      postedBy: job.postedBy,
       company: job.company
         ? {
             id: job.company.id,
@@ -215,6 +217,7 @@ exports.getJobById = async (req, res, next) => {
           max: job.salaryMax,
         },
         skillsRequired: job.skillsRequired || "",
+        postedBy: job.postedBy,
         company: job.company
           ? {
               id: job.company.id,

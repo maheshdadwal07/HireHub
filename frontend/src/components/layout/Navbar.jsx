@@ -23,9 +23,26 @@ const Navbar = () => {
             <Link to="/" className="flex items-center text-gray-600 hover:text-blue-600 transition-colors">
               <Home className="h-5 w-5 mr-1" /> Home
             </Link>
-            <Link to="/applications" className="flex items-center text-gray-600 hover:text-blue-600 transition-colors">
-              <FileText className="h-5 w-5 mr-1" /> My Apps
-            </Link>
+
+            {user?.role === 'JOB_SEEKER' && (
+              <Link to="/applications" className="flex items-center text-gray-600 hover:text-blue-600 transition-colors">
+                <FileText className="h-5 w-5 mr-1" /> My Apps
+              </Link>
+            )}
+
+            {user?.role === 'RECRUITER' && (
+              <>
+                <Link to="/recruiter/jobs" className="flex items-center text-gray-600 hover:text-blue-600 transition-colors">
+                  <Briefcase className="h-5 w-5 mr-1" /> Manage Jobs
+                </Link>
+                <Link 
+                  to="/recruiter/create-job" 
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Post a Job
+                </Link>
+              </>
+            )}
             
             <div className="h-8 w-px bg-gray-200 mx-2"></div>
             

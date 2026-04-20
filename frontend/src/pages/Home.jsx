@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Search, MapPin, Briefcase, IndianRupee, Loader2 } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Search, MapPin, Briefcase, IndianRupee, Loader2, Plus } from 'lucide-react';
 import { getJobs } from '../services/job.service';
+import { getCurrentUser } from '../services/auth.service';
 
 const Home = () => {
     const navigate = useNavigate();
+    const user = getCurrentUser();
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState({
@@ -34,6 +36,27 @@ const Home = () => {
 
     return (
         <div className="space-y-8">
+            {/* Hero / Welcome */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-extrabold text-gray-900">
+                        {user?.role === 'RECRUITER' ? 'Recruiter Dashboard' : 'Explore Opportunities'}
+                    </h1>
+                    <p className="text-gray-500 mt-1">
+                        {user?.role === 'RECRUITER' 
+                            ? 'Manage your postings and find the best talent.' 
+                            : 'Find your dream job at top tech companies.'}
+                    </p>
+                </div>
+                {user?.role === 'RECRUITER' && (
+                    <Link 
+                        to="/recruiter/create-job" 
+                        className="flex items-center bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition-shadow shadow-lg shadow-blue-100"
+                    >
+                        <Plus className="h-5 w-5 mr-2" /> Post New Job
+                    </Link>
+                )}
+            </div>
             {/* Header & Filters */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4 items-center">
                 <div className="relative flex-1 w-full">

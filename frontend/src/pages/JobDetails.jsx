@@ -12,9 +12,20 @@ const JobDetails = () => {
     const [job, setJob] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    const isOwner = user?.id === job?.postedBy;
+    // Ownership & Role detection (Exhaustive Check)
+    const currentUserId = user?.id || user?._id || user?.userId;
+    const jobOwnerId = job?.postedBy;
+    
+    const isOwner = !!(jobOwnerId && currentUserId && String(jobOwnerId) === String(currentUserId));
     const isSeeker = user?.role === 'JOB_SEEKER';
     const isRecruiter = user?.role === 'RECRUITER';
+
+    // Debugging logs (Mandatory per test requirements)
+    if (job && !loading) {
+        console.log("Job postedBy:", job.postedBy);
+        console.log("Current user ID:", user?.id);
+        console.log("Is Owner:", isOwner);
+    }
 
     useEffect(() => {
         const fetchJob = async () => {
@@ -69,23 +80,33 @@ const JobDetails = () => {
                         </div>
                     </div>
                     
-                    {isOwner ? (
-                        <button 
-                            className="bg-amber-500 text-white px-8 py-3 rounded-xl font-bold hover:bg-amber-600 transition-colors shadow-lg shadow-amber-200 flex items-center"
-                        >
-                            <Edit className="h-5 w-5 mr-2" /> Edit Job
-                        </button>
-                    ) : isSeeker ? (
-                        <button 
-                            className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200 flex items-center"
-                        >
-                            <Send className="h-5 w-5 mr-2" /> Apply for this Job
-                        </button>
-                    ) : isRecruiter ? (
-                        <div className="bg-gray-100 text-gray-500 px-6 py-3 rounded-xl font-medium border border-gray-200 italic">
-                            Published by another Recruiter
-                        </div>
-                    ) : null}
+                    {/* Action Buttons: Strictly Role-Based */}
+                    <div className="flex flex-wrap gap-4">
+                        {isOwner ? (
+                            <>
+                                <button 
+                                    className="bg-amber-500 text-white px-8 py-3 rounded-xl font-bold hover:bg-amber-600 transition-colors shadow-lg shadow-amber-200 flex items-center"
+                                >
+                                    <Edit className="h-5 w-5 mr-2" /> Edit Job
+                                </button>
+                                <button 
+                                    className="bg-red-50 text-red-600 px-8 py-3 rounded-xl font-bold hover:bg-red-100 transition-colors flex items-center border border-red-100"
+                                >
+                                    Delete Job
+                                </button>
+                            </>
+                        ) : isSeeker ? (
+                            <button 
+                                className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200 flex items-center"
+                            >
+                                <Send className="h-5 w-5 mr-2" /> Apply for this Job
+                            </button>
+                        ) : isRecruiter ? (
+                            <div className="bg-gray-100 text-gray-500 px-6 py-3 rounded-xl font-medium border border-gray-200 italic flex items-center">
+                                <Briefcase className="h-4 w-4 mr-2" /> Published by another Recruiter
+                            </div>
+                        ) : null}
+                    </div>
                 </div>
 
                 <div className="mt-8 pt-8 border-t border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-6">
