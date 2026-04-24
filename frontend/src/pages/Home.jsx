@@ -49,9 +49,9 @@ const Home = () => {
     useEffect(() => {
         if (user?.role === 'JOB_SEEKER') {
             fetchAppliedJobs();
-        } else if (user?.role === 'RECRUITER') {
-            // For recruiters, filter jobs to show only their postings
-            setFilters({ search: '', location: '', employmentType: '', postedBy: user.id });
+        } else if (user?.role === 'RECRUITER' && !filters.postedBy) {
+            // For recruiters, filter jobs to show only their postings (only set once)
+            setFilters(prev => ({ ...prev, postedBy: user.id }));
         }
     }, [user?.id, user?.role]);
 
@@ -108,8 +108,8 @@ const Home = () => {
         bgColor: ['bg-blue-600', 'bg-teal-600', 'bg-purple-700'][index],
         title: job.title,
         location: job.location,
-        tags: job.skills ? job.skills.split(',').slice(0, 3) : ['Trending'],
-        salary: job.salary ? `$${job.salary.min}–${job.salary.max}K` : 'Competitive',
+        tags: job.skillsRequired && job.skillsRequired.trim() ? job.skillsRequired.split(',').slice(0, 3).map(s => s.trim()) : [],
+        salary: job.salary ? `₹${job.salary.min}–${job.salary.max}` : 'Competitive',
         featured: index === 0
     }));
 
