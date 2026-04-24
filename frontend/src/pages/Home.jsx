@@ -49,6 +49,9 @@ const Home = () => {
     useEffect(() => {
         if (user?.role === 'JOB_SEEKER') {
             fetchAppliedJobs();
+        } else if (user?.role === 'RECRUITER') {
+            // For recruiters, filter jobs to show only their postings
+            setFilters({ search: '', location: '', employmentType: '', postedBy: user.id });
         }
     }, [user?.id, user?.role]);
 
@@ -98,38 +101,17 @@ const Home = () => {
         }
     ];
 
-    const heroJobs = [
-        {
-            company: 'Google',
-            logo: 'G',
-            bgColor: 'bg-blue-600',
-            title: 'Product Designer',
-            location: 'Mountain View',
-            tags: ['Figma', 'UX Research', 'Remote OK'],
-            salary: '$130–160K',
-            featured: true
-        },
-        {
-            company: 'Shopify',
-            logo: 'S',
-            bgColor: 'bg-teal-600',
-            title: 'Full-Stack Engineer',
-            location: 'Remote',
-            tags: ['React', 'Node.js', 'PostgreSQL'],
-            salary: '$110–140K',
-            featured: false
-        },
-        {
-            company: 'Netflix',
-            logo: 'N',
-            bgColor: 'bg-purple-700',
-            title: 'Data Scientist',
-            location: 'Los Gatos',
-            tags: ['Python', 'ML', 'Spark'],
-            salary: '$160–200K',
-            featured: false
-        }
-    ];
+    const heroJobs = jobs.slice(0, 3).map((job, index) => ({
+        id: job.id,
+        company: job.company?.name || 'Company',
+        logo: (job.company?.name || 'C').charAt(0).toUpperCase(),
+        bgColor: ['bg-blue-600', 'bg-teal-600', 'bg-purple-700'][index],
+        title: job.title,
+        location: job.location,
+        tags: job.skills ? job.skills.split(',').slice(0, 3) : ['Trending'],
+        salary: job.salary ? `$${job.salary.min}–${job.salary.max}K` : 'Competitive',
+        featured: index === 0
+    }));
 
     // RECRUITER DASHBOARD
     if (user?.role === 'RECRUITER') {
@@ -246,8 +228,8 @@ const Home = () => {
                     </div>
 
                     <div className="space-y-4">
-                        {heroJobs.map((job, i) => (
-                            <div key={i} onClick={() => navigate(`/jobs/${jobs.find(j => j.title === job.title)?.id || '#'}`)} className={`p-5 rounded-2xl border-2 transition hover:shadow-lg cursor-pointer ${job.featured ? 'border-blue-600 bg-gradient-to-br from-blue-50 to-blue-25' : 'border-gray-200 bg-white hover:border-blue-300'}`}>
+                        {heroJobs.length > 0 ? heroJobs.map((job, i) => (
+                            <div key={job.id} onClick={() => navigate(`/jobs/${job.id}`)} className={`p-5 rounded-2xl border-2 transition hover:shadow-lg cursor-pointer ${job.featured ? 'border-blue-600 bg-gradient-to-br from-blue-50 to-blue-25' : 'border-gray-200 bg-white hover:border-blue-300'}`}>
                                 <div className="flex justify-between items-start mb-3">
                                     <div className="flex gap-3">
                                         <div className={`w-12 h-12 ${job.bgColor} rounded-xl flex items-center justify-center font-bold text-white flex-shrink-0`}>
@@ -274,7 +256,11 @@ const Home = () => {
                                     </button>
                                 </div>
                             </div>
-                        ))}
+                        )) : (
+                            <div className="text-center py-8 text-gray-500">
+                                <p className="text-sm">Loading recent jobs...</p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </section>
