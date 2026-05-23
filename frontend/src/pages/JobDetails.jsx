@@ -4,7 +4,7 @@ import {
     MapPin, Briefcase, IndianRupee, Calendar, Clock, 
     ChevronLeft, Loader2, Edit, Send, CheckCircle, 
     AlertCircle, Building2, ShieldCheck, Globe, Zap,
-    ArrowLeft, Trash2
+    ArrowLeft, Trash2, Star
 } from 'lucide-react';
 import { getJobById, deleteJob } from '../services/job.service';
 import { getCurrentUser } from '../services/auth.service';

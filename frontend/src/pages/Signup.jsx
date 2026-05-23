@@ -20,10 +20,10 @@ const Signup = () => {
         if (!formData.name) newErrors.name = "Name is required";
         if (!formData.email) newErrors.email = "Email is required";
         else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Invalid email format";
-        
+
         if (!formData.password) newErrors.password = "Password is required";
         else if (formData.password.length < 6) newErrors.password = "Password must be at least 6 characters";
-        
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -51,10 +51,10 @@ const Signup = () => {
                     }
                 }
             } catch (err) {
-                const errorMsg = err.response?.data?.errors || 
-                                 err.response?.data?.message || 
-                                 err.message || 
-                                 'Registration failed';
+                const errorMsg = err.response?.data?.errors ||
+                    err.response?.data?.message ||
+                    err.message ||
+                    'Registration failed';
                 setApiError(errorMsg);
             } finally {
                 setLoading(false);
@@ -75,7 +75,7 @@ const Signup = () => {
             <div className="hidden lg:flex flex-1 bg-slate-900 items-center justify-center p-12 relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[100px] -ml-64 -mt-64"></div>
                 <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[100px] -mr-64 -mb-64"></div>
-                
+
                 <div className="max-w-md space-y-12 relative z-10">
                     <div className="space-y-6">
                         <h3 className="text-5xl font-black text-white leading-tight">
@@ -140,16 +140,16 @@ const Signup = () => {
                     <form className="space-y-5" onSubmit={handleSubmit}>
                         <div className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
-                                <button 
+                                <button
                                     type="button"
-                                    onClick={() => setFormData({...formData, role: 'JOB_SEEKER'})}
+                                    onClick={() => setFormData({ ...formData, role: 'JOB_SEEKER' })}
                                     className={`py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all border-2 ${formData.role === 'JOB_SEEKER' ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-100' : 'bg-slate-50 border-transparent text-slate-400'}`}
                                 >
                                     Job Seeker
                                 </button>
-                                <button 
+                                <button
                                     type="button"
-                                    onClick={() => setFormData({...formData, role: 'RECRUITER'})}
+                                    onClick={() => setFormData({ ...formData, role: 'RECRUITER' })}
                                     className={`py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all border-2 ${formData.role === 'RECRUITER' ? 'bg-slate-900 border-slate-900 text-white shadow-lg shadow-slate-100' : 'bg-slate-50 border-transparent text-slate-400'}`}
                                 >
                                     Recruiter
