@@ -97,7 +97,8 @@ const CreateJob = () => {
             const data = {
                 ...formData,
                 salaryMin: parseInt(formData.salaryMin),
-                salaryMax: parseInt(formData.salaryMax)
+                salaryMax: parseInt(formData.salaryMax),
+                companyId: parseInt(formData.companyId)
             };
             
             if (isEditMode) {
@@ -286,6 +287,7 @@ const CreateJob = () => {
                                 <div className="relative">
                                     <Calendar className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" />
                                     <input
+                                        required
                                         type="date"
                                         name="applicationDeadline"
                                         value={formData.applicationDeadline}
@@ -357,6 +359,7 @@ const CreateJob = () => {
                             <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 ml-1">Job Description & Responsibilities</label>
                             <textarea
                                 required
+                                minLength={10}
                                 name="description"
                                 value={formData.description}
                                 onChange={handleChange}
