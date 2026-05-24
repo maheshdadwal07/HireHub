@@ -109,7 +109,7 @@ const CreateJob = () => {
                 navigate(`/jobs/${response.data.id}`);
             }
         } catch (err) {
-            setError(err.message || 'Failed to save job');
+            setError(err.errors || err.message || 'Failed to save job');
         } finally {
             setSubmitting(false);
         }
