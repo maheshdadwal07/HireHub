@@ -4,7 +4,7 @@ import { getProfile, updateProfile } from '../../services/user.service';
 import { getCurrentUser } from '../../services/auth.service';
 
 const Profile = () => {
-    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001';
+    const BACKEND_URL = import.meta.env.VITE_API_URL || "http://44.213.126.195/api";
     const authUser = getCurrentUser();
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -21,13 +21,13 @@ const Profile = () => {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
-    
+
     const toggleEdit = (section) => {
         setEditStates(prev => ({ ...prev, [section]: !prev[section] }));
         setError(null);
         setSuccess(null);
     };
-    
+
     // Form state
     const [formData, setFormData] = useState({
         name: '',
@@ -40,19 +40,19 @@ const Profile = () => {
     });
     const [newSkill, setNewSkill] = useState('');
     const [newSocial, setNewSocial] = useState({ platform: '', url: '' });
-    const [newEducation, setNewEducation] = useState({ 
-        school: '', 
-        degree: '', 
+    const [newEducation, setNewEducation] = useState({
+        school: '',
+        degree: '',
         fieldOfStudy: '',
         startMonth: '',
         startYear: '',
         endMonth: '',
         endYear: '',
-        description: '' 
+        description: ''
     });
-    const [newExperience, setNewExperience] = useState({ 
-        company: '', 
-        role: '', 
+    const [newExperience, setNewExperience] = useState({
+        company: '',
+        role: '',
         employmentType: '',
         location: '',
         locationType: '',
@@ -61,14 +61,14 @@ const Profile = () => {
         startYear: '',
         endMonth: '',
         endYear: '',
-        description: '' 
+        description: ''
     });
 
 
 
 
 
-    
+
     const [selectedResume, setSelectedResume] = useState(null);
     const [selectedPhoto, setSelectedPhoto] = useState(null);
     const [selectedCover, setSelectedCover] = useState(null);
@@ -146,15 +146,15 @@ const Profile = () => {
                 ...prev,
                 education: [...prev.education, eduToAdd]
             }));
-            setNewEducation({ 
-                school: '', 
-                degree: '', 
+            setNewEducation({
+                school: '',
+                degree: '',
                 fieldOfStudy: '',
                 startMonth: '',
                 startYear: '',
                 endMonth: '',
                 endYear: '',
-                description: '' 
+                description: ''
             });
         }
     };
@@ -171,7 +171,7 @@ const Profile = () => {
         if (newExperience.company && newExperience.role) {
             // Construct a display duration string
             const duration = `${newExperience.startMonth} ${newExperience.startYear} - ${newExperience.currentlyWorking ? 'Present' : `${newExperience.endMonth} ${newExperience.endYear}`}`;
-            
+
             const expToAdd = {
                 ...newExperience,
                 duration // Keep duration for existing display logic
@@ -181,9 +181,9 @@ const Profile = () => {
                 ...prev,
                 experience: [...prev.experience, expToAdd]
             }));
-            setNewExperience({ 
-                company: '', 
-                role: '', 
+            setNewExperience({
+                company: '',
+                role: '',
                 employmentType: '',
                 location: '',
                 locationType: '',
@@ -192,7 +192,7 @@ const Profile = () => {
                 startYear: '',
                 endMonth: '',
                 endYear: '',
-                description: '' 
+                description: ''
             });
         }
     };
@@ -295,12 +295,12 @@ const Profile = () => {
                 // Update local storage if name changed
                 const currentUser = JSON.parse(localStorage.getItem('user'));
                 localStorage.setItem('user', JSON.stringify({ ...currentUser, name: response.data.name }));
-                
+
                 // Clear file selections
                 setSelectedResume(null);
                 setSelectedPhoto(null);
                 setSelectedCover(null);
-                
+
                 // Trigger an event to update Navbar
                 window.dispatchEvent(new CustomEvent('user-updated'));
             }
@@ -336,24 +336,24 @@ const Profile = () => {
                             <FileText className="w-20 h-20 text-white/5 relative z-10" />
                         </div>
                     )}
-                    
+
                     {editStates.header && (
-                        <button 
+                        <button
                             onClick={() => coverInputRef.current?.click()}
                             className="absolute top-6 right-6 flex items-center gap-2 bg-white/20 backdrop-blur-md text-white px-4 py-2 rounded-xl font-bold border border-white/30 hover:bg-white/30 transition-all shadow-xl z-20"
                         >
                             <Camera className="w-4 h-4" /> Change Cover
                         </button>
                     )}
-                    <input 
-                        type="file" 
-                        ref={coverInputRef} 
-                        className="hidden" 
-                        accept="image/*" 
-                        onChange={handleCoverChange} 
+                    <input
+                        type="file"
+                        ref={coverInputRef}
+                        className="hidden"
+                        accept="image/*"
+                        onChange={handleCoverChange}
                     />
                 </div>
-                
+
                 {/* Profile Photo & Name Section */}
                 <div className="px-12 flex flex-col sm:flex-row items-start sm:items-end gap-8 -mt-20 relative z-10">
                     <div className="relative">
@@ -367,28 +367,28 @@ const Profile = () => {
                             </div>
                         </div>
                         {editStates.header && (
-                            <button 
+                            <button
                                 onClick={() => photoInputRef.current?.click()}
                                 className="absolute bottom-2 -right-2 p-3 bg-blue-600 text-white rounded-2xl shadow-xl hover:bg-blue-700 transition-all border-4 border-white"
                             >
                                 <Camera className="w-5 h-5" />
                             </button>
                         )}
-                        <input 
-                            type="file" 
-                            ref={photoInputRef} 
-                            className="hidden" 
-                            accept="image/*" 
-                            onChange={handlePhotoChange} 
+                        <input
+                            type="file"
+                            ref={photoInputRef}
+                            className="hidden"
+                            accept="image/*"
+                            onChange={handlePhotoChange}
                         />
                     </div>
-                    
+
                     <div className="flex-1 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-6 w-full">
                         <div>
                             <div className="flex items-center gap-3 mb-1">
                                 {editStates.header ? (
-                                    <input 
-                                        type="text" 
+                                    <input
+                                        type="text"
                                         name="name"
                                         value={formData.name}
                                         onChange={handleInputChange}
@@ -415,11 +415,11 @@ const Profile = () => {
                                     <button onClick={() => handleSubmit('header')} disabled={saving} className="bg-blue-600 text-white px-6 py-2 rounded-xl font-black shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95">Save Changes</button>
                                 </>
                             ) : (
-                                <button 
+                                <button
                                     onClick={() => toggleEdit('header')}
                                     className="group flex items-center gap-2 bg-white text-gray-900 px-5 py-2.5 rounded-2xl shadow-xl hover:shadow-2xl transition-all border border-gray-100 font-bold"
                                 >
-                                    <Edit2 className="w-4 h-4 text-blue-600 group-hover:rotate-12 transition-transform" /> 
+                                    <Edit2 className="w-4 h-4 text-blue-600 group-hover:rotate-12 transition-transform" />
                                     Edit Profile
                                 </button>
                             )}
@@ -434,7 +434,7 @@ const Profile = () => {
                     <span className="font-semibold">{error}</span>
                 </div>
             )}
-            
+
             {success && (
                 <div className="mb-8 p-5 bg-green-50 border-l-4 border-green-500 text-green-700 rounded-2xl flex items-center gap-3 shadow-sm">
                     <div className="bg-green-100 p-2 rounded-lg"><Check className="w-5 h-5" /></div>
@@ -451,7 +451,7 @@ const Profile = () => {
                             Contact Info
                             <div className="w-10 h-1 bg-blue-600 rounded-full"></div>
                         </h2>
-                        
+
                         <div className="space-y-6">
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-blue-50 rounded-2xl text-blue-600">
@@ -482,8 +482,8 @@ const Profile = () => {
                                         )}
                                     </div>
                                     {editStates.contact ? (
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="text"
                                             name="phone"
                                             value={formData.phone}
                                             onChange={handleInputChange}
@@ -515,19 +515,19 @@ const Profile = () => {
 
                         {editStates.socials && (
                             <div className="mb-6 p-4 bg-gray-50 rounded-2xl border border-gray-100 space-y-3">
-                                <input 
+                                <input
                                     placeholder="Platform (e.g. GitHub)"
                                     value={newSocial.platform}
-                                    onChange={e => setNewSocial({...newSocial, platform: e.target.value})}
+                                    onChange={e => setNewSocial({ ...newSocial, platform: e.target.value })}
                                     className="w-full bg-white border-none rounded-xl px-3 py-2 text-xs font-bold"
                                 />
-                                <input 
+                                <input
                                     placeholder="URL (https://...)"
                                     value={newSocial.url}
-                                    onChange={e => setNewSocial({...newSocial, url: e.target.value})}
+                                    onChange={e => setNewSocial({ ...newSocial, url: e.target.value })}
                                     className="w-full bg-white border-none rounded-xl px-3 py-2 text-xs font-bold"
                                 />
-                                <button 
+                                <button
                                     onClick={handleAddSocial}
                                     className="w-full bg-blue-600 text-white py-2 rounded-xl text-xs font-black"
                                 >
@@ -577,8 +577,8 @@ const Profile = () => {
                         {editStates.expertise && (
                             <form onSubmit={handleAddSkill} className="mb-4">
                                 <div className="relative">
-                                    <input 
-                                        type="text" 
+                                    <input
+                                        type="text"
                                         value={newSkill}
                                         onChange={(e) => setNewSkill(e.target.value)}
                                         placeholder="Add skill..."
@@ -620,7 +620,7 @@ const Profile = () => {
                             )}
                         </div>
                         {editStates.bio ? (
-                            <textarea 
+                            <textarea
                                 name="bio"
                                 value={formData.bio}
                                 onChange={handleInputChange}
@@ -656,19 +656,19 @@ const Profile = () => {
                                 <div className="space-y-4">
                                     <div>
                                         <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Title *</label>
-                                        <input 
+                                        <input
                                             placeholder="Ex: Retail Sales Manager"
                                             value={newExperience.role}
-                                            onChange={e => setNewExperience({...newExperience, role: e.target.value})}
+                                            onChange={e => setNewExperience({ ...newExperience, role: e.target.value })}
                                             className="w-full bg-white border-none rounded-xl px-4 py-3 text-sm font-bold shadow-sm"
                                         />
                                     </div>
 
                                     <div>
                                         <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Employment type</label>
-                                        <select 
+                                        <select
                                             value={newExperience.employmentType}
-                                            onChange={e => setNewExperience({...newExperience, employmentType: e.target.value})}
+                                            onChange={e => setNewExperience({ ...newExperience, employmentType: e.target.value })}
                                             className="w-full bg-white border-none rounded-xl px-4 py-3 text-sm font-bold shadow-sm"
                                         >
                                             <option value="">Please select</option>
@@ -683,20 +683,20 @@ const Profile = () => {
 
                                     <div>
                                         <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Company or organization *</label>
-                                        <input 
+                                        <input
                                             placeholder="Ex: Microsoft"
                                             value={newExperience.company}
-                                            onChange={e => setNewExperience({...newExperience, company: e.target.value})}
+                                            onChange={e => setNewExperience({ ...newExperience, company: e.target.value })}
                                             className="w-full bg-white border-none rounded-xl px-4 py-3 text-sm font-bold shadow-sm"
                                         />
                                     </div>
 
                                     <div className="flex items-center gap-3 py-2">
-                                        <input 
-                                            type="checkbox" 
+                                        <input
+                                            type="checkbox"
                                             id="currentlyWorking"
                                             checked={newExperience.currentlyWorking}
-                                            onChange={e => setNewExperience({...newExperience, currentlyWorking: e.target.checked})}
+                                            onChange={e => setNewExperience({ ...newExperience, currentlyWorking: e.target.checked })}
                                             className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                         />
                                         <label htmlFor="currentlyWorking" className="text-sm font-bold text-gray-700 cursor-pointer">I am currently working in this role</label>
@@ -705,9 +705,9 @@ const Profile = () => {
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-2">
                                             <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Start Month</label>
-                                            <select 
+                                            <select
                                                 value={newExperience.startMonth}
-                                                onChange={e => setNewExperience({...newExperience, startMonth: e.target.value})}
+                                                onChange={e => setNewExperience({ ...newExperience, startMonth: e.target.value })}
                                                 className="w-full bg-white border-none rounded-xl px-4 py-3 text-sm font-bold shadow-sm"
                                             >
                                                 <option value="">Month</option>
@@ -718,9 +718,9 @@ const Profile = () => {
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Start Year *</label>
-                                            <select 
+                                            <select
                                                 value={newExperience.startYear}
-                                                onChange={e => setNewExperience({...newExperience, startYear: e.target.value})}
+                                                onChange={e => setNewExperience({ ...newExperience, startYear: e.target.value })}
                                                 className="w-full bg-white border-none rounded-xl px-4 py-3 text-sm font-bold shadow-sm"
                                             >
                                                 <option value="">Year</option>
@@ -736,9 +736,9 @@ const Profile = () => {
                                         <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2">
                                             <div className="space-y-2">
                                                 <label className="text-[10px] font-black text-gray-400 uppercase ml-1">End Month</label>
-                                                <select 
+                                                <select
                                                     value={newExperience.endMonth}
-                                                    onChange={e => setNewExperience({...newExperience, endMonth: e.target.value})}
+                                                    onChange={e => setNewExperience({ ...newExperience, endMonth: e.target.value })}
                                                     className="w-full bg-white border-none rounded-xl px-4 py-3 text-sm font-bold shadow-sm"
                                                 >
                                                     <option value="">Month</option>
@@ -749,9 +749,9 @@ const Profile = () => {
                                             </div>
                                             <div className="space-y-2">
                                                 <label className="text-[10px] font-black text-gray-400 uppercase ml-1">End Year *</label>
-                                                <select 
+                                                <select
                                                     value={newExperience.endYear}
-                                                    onChange={e => setNewExperience({...newExperience, endYear: e.target.value})}
+                                                    onChange={e => setNewExperience({ ...newExperience, endYear: e.target.value })}
                                                     className="w-full bg-white border-none rounded-xl px-4 py-3 text-sm font-bold shadow-sm"
                                                 >
                                                     <option value="">Year</option>
@@ -766,19 +766,19 @@ const Profile = () => {
 
                                     <div>
                                         <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Location</label>
-                                        <input 
+                                        <input
                                             placeholder="Ex: London, United Kingdom"
                                             value={newExperience.location}
-                                            onChange={e => setNewExperience({...newExperience, location: e.target.value})}
+                                            onChange={e => setNewExperience({ ...newExperience, location: e.target.value })}
                                             className="w-full bg-white border-none rounded-xl px-4 py-3 text-sm font-bold shadow-sm"
                                         />
                                     </div>
 
                                     <div>
                                         <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Location type</label>
-                                        <select 
+                                        <select
                                             value={newExperience.locationType}
-                                            onChange={e => setNewExperience({...newExperience, locationType: e.target.value})}
+                                            onChange={e => setNewExperience({ ...newExperience, locationType: e.target.value })}
                                             className="w-full bg-white border-none rounded-xl px-4 py-3 text-sm font-bold shadow-sm"
                                         >
                                             <option value="">Please select</option>
@@ -790,17 +790,17 @@ const Profile = () => {
 
                                     <div>
                                         <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Description</label>
-                                        <textarea 
+                                        <textarea
                                             placeholder="Briefly describe your responsibilities and achievements..."
                                             value={newExperience.description}
-                                            onChange={e => setNewExperience({...newExperience, description: e.target.value})}
+                                            onChange={e => setNewExperience({ ...newExperience, description: e.target.value })}
                                             className="w-full bg-white border-none rounded-xl px-4 py-3 text-sm font-medium shadow-sm resize-none"
                                             rows={3}
                                         />
                                     </div>
                                 </div>
 
-                                <button 
+                                <button
                                     onClick={handleAddExperience}
                                     className="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all active:scale-95 mt-4"
                                 >
@@ -863,30 +863,30 @@ const Profile = () => {
                                 <div className="space-y-4">
                                     <div>
                                         <label className="text-[10px] font-black text-gray-400 uppercase ml-1">School *</label>
-                                        <input 
+                                        <input
                                             placeholder="Ex: Boston University"
                                             value={newEducation.school}
-                                            onChange={e => setNewEducation({...newEducation, school: e.target.value})}
+                                            onChange={e => setNewEducation({ ...newEducation, school: e.target.value })}
                                             className="w-full bg-white border-none rounded-xl px-4 py-3 text-sm font-bold shadow-sm"
                                         />
                                     </div>
 
                                     <div>
                                         <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Degree</label>
-                                        <input 
+                                        <input
                                             placeholder="Ex: Bachelor of Science"
                                             value={newEducation.degree}
-                                            onChange={e => setNewEducation({...newEducation, degree: e.target.value})}
+                                            onChange={e => setNewEducation({ ...newEducation, degree: e.target.value })}
                                             className="w-full bg-white border-none rounded-xl px-4 py-3 text-sm font-bold shadow-sm"
                                         />
                                     </div>
 
                                     <div>
                                         <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Field of study</label>
-                                        <input 
+                                        <input
                                             placeholder="Ex: Business"
                                             value={newEducation.fieldOfStudy}
-                                            onChange={e => setNewEducation({...newEducation, fieldOfStudy: e.target.value})}
+                                            onChange={e => setNewEducation({ ...newEducation, fieldOfStudy: e.target.value })}
                                             className="w-full bg-white border-none rounded-xl px-4 py-3 text-sm font-bold shadow-sm"
                                         />
                                     </div>
@@ -894,9 +894,9 @@ const Profile = () => {
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-2">
                                             <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Start Month</label>
-                                            <select 
+                                            <select
                                                 value={newEducation.startMonth}
-                                                onChange={e => setNewEducation({...newEducation, startMonth: e.target.value})}
+                                                onChange={e => setNewEducation({ ...newEducation, startMonth: e.target.value })}
                                                 className="w-full bg-white border-none rounded-xl px-4 py-3 text-sm font-bold shadow-sm"
                                             >
                                                 <option value="">Month</option>
@@ -907,9 +907,9 @@ const Profile = () => {
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Start Year</label>
-                                            <select 
+                                            <select
                                                 value={newEducation.startYear}
-                                                onChange={e => setNewEducation({...newEducation, startYear: e.target.value})}
+                                                onChange={e => setNewEducation({ ...newEducation, startYear: e.target.value })}
                                                 className="w-full bg-white border-none rounded-xl px-4 py-3 text-sm font-bold shadow-sm"
                                             >
                                                 <option value="">Year</option>
@@ -924,9 +924,9 @@ const Profile = () => {
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-2">
                                             <label className="text-[10px] font-black text-gray-400 uppercase ml-1">End Month (or expected)</label>
-                                            <select 
+                                            <select
                                                 value={newEducation.endMonth}
-                                                onChange={e => setNewEducation({...newEducation, endMonth: e.target.value})}
+                                                onChange={e => setNewEducation({ ...newEducation, endMonth: e.target.value })}
                                                 className="w-full bg-white border-none rounded-xl px-4 py-3 text-sm font-bold shadow-sm"
                                             >
                                                 <option value="">Month</option>
@@ -937,9 +937,9 @@ const Profile = () => {
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-[10px] font-black text-gray-400 uppercase ml-1">End Year (or expected)</label>
-                                            <select 
+                                            <select
                                                 value={newEducation.endYear}
-                                                onChange={e => setNewEducation({...newEducation, endYear: e.target.value})}
+                                                onChange={e => setNewEducation({ ...newEducation, endYear: e.target.value })}
                                                 className="w-full bg-white border-none rounded-xl px-4 py-3 text-sm font-bold shadow-sm"
                                             >
                                                 <option value="">Year</option>
@@ -952,7 +952,7 @@ const Profile = () => {
                                     </div>
                                 </div>
 
-                                <button 
+                                <button
                                     onClick={handleAddEducation}
                                     className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 mt-4"
                                 >
@@ -1004,7 +1004,7 @@ const Profile = () => {
                                     </div>
                                 )}
                             </div>
-                            
+
                             {user?.resumeUrl && !editStates.resume ? (
                                 <div className="flex items-center justify-between p-6 bg-blue-50 border border-blue-100 rounded-3xl">
                                     <div className="flex items-center gap-4">
@@ -1013,10 +1013,10 @@ const Profile = () => {
                                         </div>
                                         <p className="font-black text-gray-900">{user.resumeName || 'Resume'}</p>
                                     </div>
-                                    <a href={`http://localhost:5001${user.resumeUrl}`} target="_blank" rel="noreferrer" className="bg-white text-blue-600 px-6 py-2.5 rounded-2xl font-black shadow-lg">Download</a>
+                                    <a href={`http://44.213.126.195${user.resumeUrl}`} target="_blank" rel="noreferrer" className="bg-white text-blue-600 px-6 py-2.5 rounded-2xl font-black shadow-lg">Download</a>
                                 </div>
                             ) : (editStates.resume || !user?.resumeUrl) && (
-                                <div 
+                                <div
                                     onClick={() => fileInputRef.current?.click()}
                                     className="border-2 border-dashed border-gray-200 rounded-[2rem] p-10 text-center cursor-pointer hover:bg-gray-50 transition-all"
                                 >
