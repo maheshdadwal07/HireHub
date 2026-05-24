@@ -359,7 +359,7 @@ const CreateJob = () => {
                             <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 ml-1">Job Description & Responsibilities</label>
                             <textarea
                                 required
-                                minLength={10}
+                                minLength={50}
                                 name="description"
                                 value={formData.description}
                                 onChange={handleChange}

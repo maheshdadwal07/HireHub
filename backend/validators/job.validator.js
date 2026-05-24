@@ -9,8 +9,7 @@ exports.jobSchema = Joi.object({
 
   description: Joi.string()
     .trim()
-    .min(10)
-    .max(2000)
+    .min(50)
     .required(),
 
   skillsRequired: Joi.string()

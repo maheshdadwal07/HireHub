@@ -31,8 +31,8 @@ const Company = sequelize.define("Company", {
         msg: "Company description is required",
       },
       len: {
-        args: [10, 2000],
-        msg: "Description must be at least 10 characters",
+        args: [50, 65000],
+        msg: "Description must be at least 50 characters",
       },
     },
   },
