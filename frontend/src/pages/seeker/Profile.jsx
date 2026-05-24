@@ -4,7 +4,7 @@ import { getProfile, updateProfile } from '../../services/user.service';
 import { getCurrentUser } from '../../services/auth.service';
 
 const Profile = () => {
-    const BACKEND_URL = import.meta.env.VITE_API_URL || "http://44.213.126.195/api";
+    const BACKEND_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5001';
     const authUser = getCurrentUser();
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -1013,7 +1013,7 @@ const Profile = () => {
                                         </div>
                                         <p className="font-black text-gray-900">{user.resumeName || 'Resume'}</p>
                                     </div>
-                                    <a href={`http://44.213.126.195${user.resumeUrl}`} target="_blank" rel="noreferrer" className="bg-white text-blue-600 px-6 py-2.5 rounded-2xl font-black shadow-lg">Download</a>
+                                    <a href={`${BACKEND_URL}${user.resumeUrl}`} target="_blank" rel="noreferrer" className="bg-white text-blue-600 px-6 py-2.5 rounded-2xl font-black shadow-lg">Download</a>
                                 </div>
                             ) : (editStates.resume || !user?.resumeUrl) && (
                                 <div
