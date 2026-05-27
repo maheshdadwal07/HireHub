@@ -42,7 +42,7 @@ app.use(express.json());
 app.use(morgan("dev"));
 
 // Health check endpoint for Render zero-downtime deployment
-app.get('/api/health', (req, res) => {
+app.get(['/health', '/api/health'], (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date() });
 });
 
