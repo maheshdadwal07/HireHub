@@ -22,10 +22,14 @@ const apiLimiter = rateLimit({
 });
 app.use('/api/', apiLimiter);
 
-// Configure CORS for production (replace with actual frontend domain)
-const allowedOrigins = process.env.NODE_ENV === 'production' 
-  ? ['https://your-vercel-domain.vercel.app'] 
-  : ['http://localhost:5173', 'http://localhost:3000'];
+// Configure CORS for production and local development
+const allowedOrigins = [
+  'https://www.hire-hub.dev',
+  'https://hire-hub.dev',
+  'https://hirehubio.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:3000'
+];
 
 app.use(cors({
   origin: function (origin, callback) {
