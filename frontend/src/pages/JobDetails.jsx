@@ -308,6 +308,17 @@ const JobDetails = () => {
                                         <p className="font-black text-sm capitalize">{job.employmentType.replace('_', ' ')}</p>
                                     </div>
                                 </div>
+                                {job.applicationDeadline && (
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-red-400">
+                                            <Clock className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Deadline</p>
+                                            <p className="font-black text-sm">{new Date(job.applicationDeadline).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

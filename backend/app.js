@@ -9,19 +9,6 @@ const app = express();
 // Trust proxy for Render load balancer
 app.set('trust proxy', 1);
 
-// Security Headers
-app.use(helmet());
-
-// Rate Limiting (100 requests per 15 minutes per IP)
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: 'Too many requests from this IP, please try again later.'
-});
-app.use('/api/', apiLimiter);
-
 // Configure CORS for production and local development
 const allowedOrigins = [
   'https://www.hire-hub.dev',
@@ -42,6 +29,19 @@ app.use(cors({
   credentials: true
 }));
 
+// Security Headers
+app.use(helmet());
+
+// Rate Limiting (100 requests per 15 minutes per IP)
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: 'Too many requests from this IP, please try again later.'
+});
+app.use('/api/', apiLimiter);
+
 app.use(express.json());
 app.use(morgan("dev"));
 
@@ -50,8 +50,7 @@ app.get(['/health', '/api/health'], (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date() });
 });
 
-const path = require("path");
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 
 const authRoutes = require("./routes/auth.routes");
 const userRoutes = require("./routes/user.routes");

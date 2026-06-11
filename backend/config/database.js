@@ -3,7 +3,7 @@ const { Sequelize } = require('sequelize');
 // Use DATABASE_URL from Railway if available, otherwise fallback to individual env vars (local)
 const sequelize = process.env.DATABASE_URL
   ? new Sequelize(process.env.DATABASE_URL, {
-      dialect: 'mysql',
+      dialect: 'postgres',
       logging: false,
       dialectOptions: {
         ssl: {
@@ -24,7 +24,7 @@ const sequelize = process.env.DATABASE_URL
       process.env.DB_PASSWORD,
       {
         host: process.env.DB_HOST,
-        dialect: 'mysql',
+        dialect: 'postgres',
         logging: false
       }
     );

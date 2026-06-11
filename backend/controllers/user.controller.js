@@ -53,14 +53,14 @@ exports.updateProfile = async (req, res, next) => {
 
     if (req.files) {
       if (req.files.resume) {
-        user.resumeUrl = `/uploads/${req.files.resume[0].filename}`;
+        user.resumeUrl = req.files.resume[0].path;
         user.resumeName = req.files.resume[0].originalname;
       }
       if (req.files.profilePhoto) {
-        user.profilePhotoUrl = `/uploads/${req.files.profilePhoto[0].filename}`;
+        user.profilePhotoUrl = req.files.profilePhoto[0].path;
       }
       if (req.files.coverPhoto) {
-        user.coverPhotoUrl = `/uploads/${req.files.coverPhoto[0].filename}`;
+        user.coverPhotoUrl = req.files.coverPhoto[0].path;
       }
     }
 

@@ -10,7 +10,7 @@ exports.createCompany = async (req, res, next) => {
     let logoUrl = req.body.logoUrl || "";
 
     if (req.file) {
-      logoUrl = `${req.protocol}://${req.get('host')}/uploads/logos/${req.file.filename}`;
+      logoUrl = req.file.path;
     }
 
     if (website && !website.startsWith('http')) {
@@ -189,7 +189,7 @@ exports.updateCompany = async (req, res, next) => {
     let logoUrl = req.body.logoUrl;
 
     if (req.file) {
-      logoUrl = `${req.protocol}://${req.get('host')}/uploads/logos/${req.file.filename}`;
+      logoUrl = req.file.path;
     }
 
     const company = await Company.findByPk(id);

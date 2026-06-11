@@ -113,6 +113,7 @@ exports.getJobs = async (req, res, next) => {
         "salaryMin",
         "salaryMax",
         "skillsRequired",
+        "applicationDeadline",
         "postedBy",
         "createdAt",
       ],
@@ -140,6 +141,7 @@ exports.getJobs = async (req, res, next) => {
         max: job.salaryMax,
       },
       skillsRequired: job.skillsRequired || "",
+      applicationDeadline: job.applicationDeadline,
       postedBy: job.postedBy,
       company: job.company
         ? {
@@ -189,6 +191,7 @@ exports.getJobById = async (req, res, next) => {
         "salaryMin",
         "salaryMax",
         "skillsRequired",
+        "applicationDeadline",
         "postedBy",
         "createdAt",
       ],
@@ -222,6 +225,7 @@ exports.getJobById = async (req, res, next) => {
           max: job.salaryMax,
         },
         skillsRequired: job.skillsRequired || "",
+        applicationDeadline: job.applicationDeadline,
         postedBy: job.postedBy,
         company: job.company
           ? {
